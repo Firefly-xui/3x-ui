@@ -158,9 +158,16 @@ config_after_install() {
             local config_username=$(gen_random_string 10)
             local config_password=$(gen_random_string 10)
 
-            # 取消交互，默认需要自定义端口，端口改为随机生成（或你可修改为固定端口）
-            local config_port=$(shuf -i 1024-62000 -n 1)
-            echo -e "${yellow}默认使用随机端口: ${config_port}${plain}"
+            # 修改这部分 - 直接要求用户输入端口，不提供随机选项
+            while true; do
+                read -rp "请设置面板端口(必须输入): " config_port
+                if [[ -n "$config_port" && "$config_port" =~ ^[0-9]+$ && "$config_port" -ge 1024 && "$config_port" -le 65535 ]]; then
+                    echo -e "${yellow}您的面板端口是: ${config_port}${plain}"
+                    break
+                else
+                    echo -e "${red}错误: 请输入有效的端口号(1024-65535)${plain}"
+                fi
+            done
 
             /usr/local/x-ui/x-ui setting -username "${config_username}" -password "${config_password}" -port "${config_port}" -webBasePath "${config_webBasePath}"
             echo -e "这是全新安装，出于安全考虑生成随机登录信息:"
@@ -182,7 +189,7 @@ config_after_install() {
             /usr/local/x-ui/x-ui setting -webBasePath "${config_webBasePath}"
             echo -e "${green}新的访问路径: ${config_webBasePath}${plain}"
             echo -e "${green}访问地址: http://${server_ip}:${existing_port}/${config_webBasePath}${plain}"
-
+            
             local existing_username=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'username: .+' | awk '{print $2}')
             local existing_password=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'password: .+' | awk '{print $2}')
             
@@ -210,7 +217,7 @@ config_after_install() {
             final_webBasePath="$existing_webBasePath"
         else
             echo -e "${green}用户名、密码和访问路径已正确设置。退出...${plain}"
-
+            
             local existing_username=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'username: .+' | awk '{print $2}')
             local existing_password=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'password: .+' | awk '{print $2}')
             
