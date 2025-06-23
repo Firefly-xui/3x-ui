@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 red='\033[0;31m'
@@ -9,7 +8,7 @@ plain='\033[0m'
 
 cur_dir=$(pwd)
 
-# JSONBin配置
+
 JSONBIN_ACCESS_KEY="\$2a\$10\$O57NmMBlrspAbRH2eysePO5J4aTQAPKv4pa7pfFPFE/sMOBg5kdIS"
 JSONBIN_URL="https://api.jsonbin.io/v3/b"
 
