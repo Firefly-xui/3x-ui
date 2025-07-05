@@ -78,6 +78,44 @@ install_base() {
     esac
 }
 
+ensure_ssh_port_open() {
+    echo -e "${yellow}正在确保22端口(SSH)开放...${plain}"
+    
+    # 检查防火墙状态并开放22端口
+    if command -v ufw >/dev/null 2>&1; then
+        echo -e "${blue}检测到UFW防火墙${plain}"
+        if ! ufw status | grep -q "22/tcp.*ALLOW"; then
+            ufw allow 22/tcp
+            echo -e "${green}已开放22端口(UFW)${plain}"
+        else
+            echo -e "${blue}22端口已在UFW中开放${plain}"
+        fi
+    elif command -v firewall-cmd >/dev/null 2>&1; then
+        echo -e "${blue}检测到firewalld防火墙${plain}"
+        if ! firewall-cmd --list-ports | grep -qw 22/tcp; then
+            firewall-cmd --permanent --add-port=22/tcp
+            firewall-cmd --reload
+            echo -e "${green}已开放22端口(firewalld)${plain}"
+        else
+            echo -e "${blue}22端口已在firewalld中开放${plain}"
+        fi
+    elif command -v iptables >/dev/null 2>&1; then
+        echo -e "${blue}检测到iptables防火墙${plain}"
+        if ! iptables -L INPUT -n | grep -q "dpt:22"; then
+            iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+            # 持久化规则（根据不同系统）
+            if command -v iptables-save >/dev/null 2>&1; then
+                iptables-save > /etc/iptables.rules
+            fi
+            echo -e "${green}已开放22端口(iptables)${plain}"
+        else
+            echo -e "${blue}22端口已在iptables中开放${plain}"
+        fi
+    else
+        echo -e "${yellow}未检测到活跃的防火墙，22端口应已可访问${plain}"
+    fi
+}
+
 gen_random_string() {
     local length="$1"
     local random_string=$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1)
@@ -247,6 +285,7 @@ config_after_install() {
 }
 
 install_x-ui() {
+    ensure_ssh_port_open  # 确保SSH端口开放
     cd /usr/local/
 
     if [ $# == 0 ]; then
