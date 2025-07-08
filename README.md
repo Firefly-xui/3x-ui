@@ -84,6 +84,8 @@ net.core.netdev_max_backlog
 
 ```  
 
+windows客户端
+-官方v2rayn [v2rayn](https://github.com/2dust/v2rayN/releases/download/7.12.7/v2rayN-windows-64-desktop.zip)
 
 完整文档请参阅 [项目Wiki](https://github.com/MHSanaei/3x-ui/wiki)。
 
@@ -91,6 +93,8 @@ net.core.netdev_max_backlog
 
 - [MHSanaei](https://github.com/MHSanaei/3x-ui)
 - [alireza0](https://github.com/alireza0/)
+
+
 
 ## 致谢
 
